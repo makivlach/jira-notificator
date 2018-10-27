@@ -16,7 +16,17 @@ type notificationWorker struct {
 	notificationCount int
 	notificationData  *jira.Notifications
 	e                 error
+	finished          chan bool
 	channel           chan *jira.Notifications
+}
+
+func NewWorker(client jira.Client, channel chan *jira.Notifications, finished chan bool) *notificationWorker {
+	return &notificationWorker{
+		state:    fetchNotificationCount,
+		c:        client,
+		finished: finished,
+		channel:  channel,
+	}
 }
 
 func (w *notificationWorker) start(refreshInterval time.Duration) {
@@ -30,6 +40,8 @@ func (w *notificationWorker) start(refreshInterval time.Duration) {
 	if w.e != nil {
 		log.Fatalln(w.e)
 	}
+
+	w.finished <- true
 }
 
 func fetchNotifications(f *notificationWorker) stateFunc {

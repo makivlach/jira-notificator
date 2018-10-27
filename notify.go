@@ -8,6 +8,13 @@ type notificator struct {
 	alert alerter
 }
 
-func (n notificator) notify(notification jira.Notification) error {
-	return n.alert("Jira", notification.Title, "assets/information.png")
+func (n notificator) notify(notifications *jira.Notifications) error {
+	for _, notification := range notifications.Notifications {
+		err := n.alert("Jira", notification.Title, "assets/information.png")
+
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

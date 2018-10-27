@@ -1,53 +1,52 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gen2brain/beeep"
-	"github.com/vlachmilan/jira-notificator/client"
+	"github.com/vlachmilan/jira-notificator/jira"
 	"log"
 	"os"
-	"time"
 )
 
 const (
-	notificationHost     = "https://predplatit.atlassian.net"
-	notificationInterval = 30
+	notificationHost     = "https://something.atlassian.net"
+	notificationInterval = 10
 )
 
 func main() {
-	c := client.New(notificationHost)
+	c := jira.New(notificationHost)
 
-	err := c.Login("", "")
-	if err != nil {
-		fmt.Print(err)
-		os.Exit(1)
-	}
-
-	fmt.Print("Uživatel přihlášen")
-
-	notificationChannel := make(chan *client.Notifications)
-
-	go func() {
-		for {
-			notificationChannel <- c.FetchNewNotifications()
-			fmt.Print("Provedena aktualizace")
-			time.Sleep(time.Second * notificationInterval)
-		}
-	}()
-
-	var notifications *client.Notifications
-	for {
-		notifications = <-notificationChannel
-
-		for _, v := range notifications.Notifications {
-			err := beeep.Alert("Jira", v.Title, "assets/information.png")
-			if err != nil {
-				log.Fatal(err)
-			}
-			break
-		}
-
-	}
+	login(c)
+	fetchNewNotifications(c)
 
 	os.Exit(0)
+}
+
+func login(c jira.Client) {
+	err := c.Login("", "")
+	if err != nil {
+		log.Fatalln(err)
+		os.Exit(1)
+	}
+	log.Println("Uživatel přihlášen")
+}
+
+func fetchNewNotifications(c jira.Client) {
+	channel := make(chan *jira.Notifications)
+	finished := make(chan bool)
+	worker := NewWorker(c, channel, finished)
+
+	notificator := &notificator{beeep.Alert}
+
+	go worker.start(notificationInterval)
+
+	for !<-finished {
+		notifications := <-channel
+		log.Println("Provedení aktualizace")
+
+		err := notificator.notify(notifications)
+		if err != nil {
+			log.Fatalln(err)
+			os.Exit(1)
+		}
+	}
 }
