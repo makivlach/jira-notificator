@@ -1,8 +1,8 @@
-package cli
+package main
 
 import (
 	"github.com/gen2brain/beeep"
-	"github.com/vlachmilan/jira-notificator/jira"
+	"github.com/vlachmilan/jira-notificator/pkg/jira"
 	"gopkg.in/AlecAivazis/survey.v1"
 	"log"
 	"os"
