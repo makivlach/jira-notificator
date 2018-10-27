@@ -19,11 +19,9 @@ const (
 	testNotificationsCount = 3
 )
 
-var testClientNotifications = &Notifications{
-	Notifications: []Notification{
-		{
-			Title: "Testovací Notifikace",
-		},
+var testClientNotifications = []Notification{
+	{
+		Title: "Testovací Notifikace",
 	},
 }
 
@@ -138,10 +136,11 @@ func (c httpClientMock) handleHostRequest(r *http.Request) (*http.Response, erro
 func (c httpClientMock) handleNotificationsRequest(r *http.Request) (*http.Response, error) {
 	resp := new(http.Response)
 	if r.Header.Get("Cookie") == testCookie {
-		notifications := testClientNotifications
-		data, _ := json.Marshal(notifications)
+		data := make(map[string]interface{})
+		data["data"] = testClientNotifications
+		notifications, _ := json.Marshal(data)
 		resp.StatusCode = http.StatusOK
-		resp.Body = ioutil.NopCloser(bytes.NewBufferString(string(data)))
+		resp.Body = ioutil.NopCloser(bytes.NewBufferString(string(notifications)))
 	} else {
 		resp.StatusCode = http.StatusUnauthorized
 	}

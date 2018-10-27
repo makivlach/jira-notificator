@@ -1,8 +1,7 @@
 package jira
 
 import (
-	"errors"
-	"github.com/adam-hanna/arrayOperations"
+	"github.com/google/go-cmp/cmp"
 	"log"
 	"time"
 )
@@ -14,12 +13,12 @@ type notificationWorker struct {
 	c                 Client
 	e                 error
 	notificationCount int
-	notificationData  *Notifications
+	notificationData  []Notification
 	finished          chan bool
-	channel           chan *Notifications
+	channel           chan []Notification
 }
 
-func NewWorker(client Client, channel chan *Notifications, finished chan bool) *notificationWorker {
+func NewWorker(client Client, channel chan []Notification, finished chan bool) *notificationWorker {
 	return &notificationWorker{
 		state:    fetchNotificationCount,
 		c:        client,
@@ -50,19 +49,23 @@ func fetchNotifications(f *notificationWorker) stateFunc {
 		return nil
 	}
 
-	z, ok := arrayOperations.Difference(f.notificationData, notifications)
-	if !ok {
-		f.e = errors.New("cannot find difference")
-		return nil
+	if !cmp.Equal(f.notificationData, notifications) {
+		var unique []Notification
+		for _, v := range notifications {
+			skip := false
+			for _, u := range f.notificationData {
+				if cmp.Equal(v, u) {
+					skip = true
+					break
+				}
+			}
+			if !skip {
+				unique = append(unique, v)
+			}
+		}
+		f.notificationData = notifications
+		f.channel <- unique
 	}
-
-	notifications, ok = z.Interface().(*Notifications)
-	if !ok {
-		f.e = errors.New("cannot convert new notifications to an object")
-		return nil
-	}
-
-	f.channel <- notifications
 
 	return fetchNotificationCount
 }

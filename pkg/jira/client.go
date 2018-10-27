@@ -25,11 +25,11 @@ type (
 
 	// notification is a single data object received by API endpoint
 	Notification struct {
-		Title     string            `json:"title"`
-		Users     map[string]string `json:"users"`
-		Template  string            `json:"template"`
-		Timestamp string            `json:"timestamp"`
-		Metadata  Metadata          `json:"metadata"`
+		Title     string   `json:"title"`
+		Users     []User   `json:"users"`
+		Template  string   `json:"template"`
+		Timestamp string   `json:"timestamp"`
+		Metadata  Metadata `json:"metadata"`
 	}
 
 	Metadata struct {
@@ -58,7 +58,7 @@ type (
 type (
 	Client interface {
 		FetchNotificationCount() (int, error)
-		FetchNotifications() (*Notifications, error)
+		FetchNotifications() ([]Notification, error)
 		Login(username, password string) error
 	}
 
@@ -169,7 +169,7 @@ func (c client) FetchNotificationCount() (int, error) {
 }
 
 //
-func (c client) FetchNotifications() (*Notifications, error) {
+func (c client) FetchNotifications() ([]Notification, error) {
 	if !c.isLoggedIn {
 		return nil, errors.New("uživatel není přihlášen")
 	}
@@ -191,11 +191,11 @@ func (c client) FetchNotifications() (*Notifications, error) {
 		return nil, err
 	}
 
-	var data *Notifications
+	var data Notifications
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		return nil, err
 	}
 
-	return data, nil
+	return data.Notifications, nil
 }
