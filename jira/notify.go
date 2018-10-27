@@ -1,14 +1,16 @@
-package main
-
-import "github.com/vlachmilan/jira-notificator/jira"
+package jira
 
 type alerter func(title, message, appIcon string) error
 
-type notificator struct {
+func NewNotificator(alertFunc alerter) Notificator {
+	return Notificator{alertFunc}
+}
+
+type Notificator struct {
 	alert alerter
 }
 
-func (n notificator) notify(notifications *jira.Notifications) error {
+func (n Notificator) Notify(notifications *Notifications) error {
 	for _, notification := range notifications.Notifications {
 		err := n.alert("Jira", notification.Title, "assets/information.png")
 

@@ -83,7 +83,30 @@ func New(host string) Client {
 	}
 }
 
+func (c *client) isHostExisting() error {
+	req, err := http.NewRequest(http.MethodGet, c.host, nil)
+	if err != nil {
+		return err
+	}
+
+	res, err := c.client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	switch res.StatusCode {
+	case http.StatusNotFound:
+		return errors.New("nepodařilo se navázat spojení se serverem. Zkontrolujte zadanou adresu jiry")
+	}
+
+	return nil
+}
+
 func (c *client) Login(username, password string) error {
+	if err := c.isHostExisting(); err != nil {
+		return err
+	}
+
 	credentials := make(map[string]string)
 	credentials["username"] = username
 	credentials["password"] = password
@@ -95,7 +118,6 @@ func (c *client) Login(username, password string) error {
 
 	req, err := http.NewRequest("POST", restAuthUrl, bytes.NewBuffer(j))
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Connection", "keep-alive")
 	if err != nil {
 		return err
 	}
@@ -104,9 +126,9 @@ func (c *client) Login(username, password string) error {
 
 	switch res.StatusCode {
 	case http.StatusNotFound:
-		return errors.New("Nepodařilo se navázat spojení se serverem. Zkontrolujte zadanou adresu jiry")
+		return errors.New("nepodařilo se navázat spojení se serverem. Zkontrolujte zadanou adresu jiry")
 	case http.StatusForbidden:
-		return errors.New("Přihlašovací údaje byly zadány chybně")
+		return errors.New("přihlašovací údaje byly zadány chybně")
 	}
 
 	c.cookie = res.Header.Get("Set-Cookie")
@@ -117,7 +139,7 @@ func (c *client) Login(username, password string) error {
 
 func (c client) FetchNotificationCount() (int, error) {
 	if !c.isLoggedIn {
-		return 0, errors.New("Uživatel není přihlášen!")
+		return 0, errors.New("uživatel není přihlášen")
 	}
 
 	req, err := http.NewRequest(http.MethodGet, c.host+restNotificationCount, nil)
@@ -126,6 +148,7 @@ func (c client) FetchNotificationCount() (int, error) {
 	}
 
 	req.Header.Set("Cookie", c.cookie)
+	req.Header.Add("Connection", "keep-alive")
 	res, err := c.client.Do(req)
 	if err != nil {
 		return 0, err
@@ -148,7 +171,7 @@ func (c client) FetchNotificationCount() (int, error) {
 //
 func (c client) FetchNotifications() (*Notifications, error) {
 	if !c.isLoggedIn {
-		return nil, errors.New("Uživatel není přihlášen!")
+		return nil, errors.New("uživatel není přihlášen")
 	}
 
 	req, err := http.NewRequest(http.MethodGet, c.host+restNotifications, nil)
@@ -157,6 +180,7 @@ func (c client) FetchNotifications() (*Notifications, error) {
 	}
 
 	req.Header.Set("Cookie", c.cookie)
+	req.Header.Add("Connection", "keep-alive")
 	res, err := c.client.Do(req)
 	if err != nil {
 		return nil, err

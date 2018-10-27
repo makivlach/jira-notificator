@@ -1,9 +1,8 @@
-package main
+package jira
 
 import (
 	"errors"
 	"github.com/adam-hanna/arrayOperations"
-	"github.com/vlachmilan/jira-notificator/jira"
 	"log"
 	"time"
 )
@@ -12,15 +11,15 @@ type stateFunc func(f *notificationWorker) stateFunc
 
 type notificationWorker struct {
 	state             stateFunc
-	c                 jira.Client
-	notificationCount int
-	notificationData  *jira.Notifications
+	c                 Client
 	e                 error
+	notificationCount int
+	notificationData  interface{}
 	finished          chan bool
-	channel           chan *jira.Notifications
+	channel           chan *Notifications
 }
 
-func NewWorker(client jira.Client, channel chan *jira.Notifications, finished chan bool) *notificationWorker {
+func NewWorker(client Client, channel chan *Notifications, finished chan bool) *notificationWorker {
 	return &notificationWorker{
 		state:    fetchNotificationCount,
 		c:        client,
@@ -29,7 +28,7 @@ func NewWorker(client jira.Client, channel chan *jira.Notifications, finished ch
 	}
 }
 
-func (w *notificationWorker) start(refreshInterval time.Duration) {
+func (w *notificationWorker) Start(refreshInterval time.Duration) {
 	state := w.state
 	for state != nil {
 		state = state(w)
@@ -57,7 +56,7 @@ func fetchNotifications(f *notificationWorker) stateFunc {
 		return nil
 	}
 
-	notifications, ok = z.Interface().(*jira.Notifications)
+	notifications, ok = z.Interface().(*Notifications)
 	if !ok {
 		f.e = errors.New("cannot convert new notifications to an object")
 		return nil
