@@ -66,7 +66,7 @@ func login(c jira.Client, login, password string) {
 }
 
 func fetchNewNotifications(c jira.Client) {
-	channel := make(chan *jira.Notifications)
+	channel := make(chan []jira.Notification)
 	finished := make(chan bool)
 	worker := jira.NewWorker(c, channel, finished)
 
@@ -74,14 +74,18 @@ func fetchNewNotifications(c jira.Client) {
 
 	go worker.Start(notificationInterval)
 
-	for !<-finished {
-		notifications := <-channel
-		log.Println("Provedení aktualizace")
+	for {
+		select {
+		case notifications := <-channel:
+			log.Println("Provedení aktualizace")
 
-		err := notificator.Notify(notifications)
-		if err != nil {
-			log.Fatalln(err)
-			os.Exit(1)
+			err := notificator.Notify(notifications)
+			if err != nil {
+				log.Fatalln(err)
+				os.Exit(1)
+			}
+		case <-finished:
+			break
 		}
 	}
 }

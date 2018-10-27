@@ -10,8 +10,8 @@ type Notificator struct {
 	alert alerter
 }
 
-func (n Notificator) Notify(notifications *Notifications) error {
-	for _, notification := range notifications.Notifications {
+func (n Notificator) Notify(notifications []Notification) error {
+	for _, notification := range notifications {
 		err := n.alert("Jira", notification.Title, "assets/information.png")
 
 		if err != nil {

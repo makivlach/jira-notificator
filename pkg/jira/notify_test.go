@@ -7,11 +7,9 @@ import (
 	"testing"
 )
 
-var testNotifyNotifications = &Notifications{
-	Notifications: []Notification{
-		{
-			Title: "Testovací Notifikace",
-		},
+var testNotifyNotifications = []Notification{
+	{
+		Title: "Testovací Notifikace",
 	},
 }
 

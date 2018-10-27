@@ -25,11 +25,11 @@ type (
 
 	// notification is a single data object received by API endpoint
 	Notification struct {
-		Title     string   `json:"title"`
-		Users     []User   `json:"users"`
-		Template  string   `json:"template"`
-		Timestamp string   `json:"timestamp"`
-		Metadata  Metadata `json:"metadata"`
+		Title     string            `json:"title"`
+		Users     map[string]string `json:"users"`
+		Template  string            `json:"template"`
+		Timestamp string            `json:"timestamp"`
+		Metadata  Metadata          `json:"metadata"`
 	}
 
 	Metadata struct {
@@ -77,7 +77,7 @@ func NewClient(host string) Client {
 		host,
 		false,
 		&http.Client{
-			Timeout: time.Second * 2,
+			Timeout: time.Second * 5,
 		},
 		"",
 	}

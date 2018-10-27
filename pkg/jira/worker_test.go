@@ -63,11 +63,11 @@ func TestNotificationWorker_fetchNotifications(t *testing.T) {
 	}
 
 	go worker.Start(0)
-	<-notificationChan
+	notifications := <-notificationChan
 	<-finishedChan
 
 	if assert.NoError(t, worker.e) {
-		assert.Equal(t, testWorkerNotifications, worker.notificationData)
+		assert.Equal(t, testWorkerNotifications, notifications)
 	}
 }
 

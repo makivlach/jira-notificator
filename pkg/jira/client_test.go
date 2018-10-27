@@ -30,7 +30,7 @@ func TestNewClient(t *testing.T) {
 		testHostUrl,
 		false,
 		&http.Client{
-			Timeout: time.Second * 2,
+			Timeout: time.Second * 5,
 		},
 		"",
 	}
