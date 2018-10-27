@@ -68,7 +68,7 @@ type (
 )
 
 // Factory to our fetcher
-func New(host string) Client {
+func NewClient(host string) Client {
 	if strings.HasSuffix(host, "/") {
 		strings.TrimSuffix(host, "/")
 	}

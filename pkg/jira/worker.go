@@ -14,7 +14,7 @@ type notificationWorker struct {
 	c                 Client
 	e                 error
 	notificationCount int
-	notificationData  interface{}
+	notificationData  *Notifications
 	finished          chan bool
 	channel           chan *Notifications
 }

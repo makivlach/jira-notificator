@@ -48,7 +48,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	c := jira.New(answers.Host)
+	c := jira.NewClient(answers.Host)
 
 	login(c, answers.Username, answers.Password)
 	fetchNewNotifications(c)

@@ -2,8 +2,8 @@ package jira
 
 type alerter func(title, message, appIcon string) error
 
-func NewNotificator(alertFunc alerter) Notificator {
-	return Notificator{alertFunc}
+func NewNotificator(alertFunc alerter) *Notificator {
+	return &Notificator{alertFunc}
 }
 
 type Notificator struct {
