@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"github.com/200sc/klangsynthese/mp3"
 	"github.com/gen2brain/beeep"
 	"github.com/vlachmilan/jira-notificator/pkg/jira"
@@ -11,6 +12,7 @@ import (
 
 const (
 	notificationInterval = 10
+	notificationSound    = "/assets/notify.mp3"
 )
 
 // the questions to ask
@@ -97,12 +99,20 @@ func fetchNewNotifications(c jira.Client) {
 }
 
 func playNotificationMusic() error {
-	f, err := os.Open("./assets/notify.mp3")
+	file, err := Asset(notificationSound)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 
-	a, err := mp3.Load(f)
+	reader := &reader{bytes.NewReader(file)}
+	a, err := mp3.Load(reader)
 	return <-a.Play()
+}
+
+type reader struct {
+	*bytes.Reader
+}
+
+func (*reader) Close() error {
+	return nil
 }

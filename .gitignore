@@ -1,1 +1,3 @@
 .idea
+cmd/jira-notificator-cli/bindata.go
+vendor
