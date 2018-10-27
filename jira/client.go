@@ -1,45 +1,48 @@
-package client
+package jira
 
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"log"
 	"net/http"
-	"net/http/cookiejar"
 	"strings"
 	"time"
 )
 
 const (
-	restNotifications = "/gateway/api/notification-log/api/2/notifications"
-	restAuthUrl       = "https://id.atlassian.com/id/rest/login"
+	restNotifications     = "/gateway/api/notification-log/api/2/notifications"
+	restNotificationCount = "/gateway/api/notification-log/api/2/notifications/count/unseen"
+	restAuthUrl           = "https://id.atlassian.com/id/rest/login"
 )
 
 // Data
 type (
 	// notifications is the multiple of notification data object
 	Notifications struct {
-		Notifications []notification `json:"data"`
+		Notifications []Notification `json:"data"`
 	}
 
 	// notification is a single data object received by API endpoint
-	notification struct {
+	Notification struct {
 		Title     string            `json:"title"`
 		Users     map[string]string `json:"users"`
 		Template  string            `json:"template"`
 		Timestamp string            `json:"timestamp"`
-		Metadata  metadata          `json:"metadata"`
+		Metadata  Metadata          `json:"metadata"`
 	}
 
-	metadata struct {
-		User user `json:"user"`
+	Metadata struct {
+		User User `json:"user"`
 	}
 
-	user struct {
+	User struct {
 		AtlassianId string `json:"atlassianId"`
 		Name        string `json:"name"`
+	}
+
+	Count struct {
+		Count int `json:"count"`
 	}
 
 	// client is service for our data fetching
@@ -54,7 +57,8 @@ type (
 // public types
 type (
 	Client interface {
-		FetchNewNotifications() *Notifications
+		FetchNotificationCount() (int, error)
+		FetchNotifications() (*Notifications, error)
 		Login(username, password string) error
 	}
 
@@ -69,14 +73,11 @@ func New(host string) Client {
 		strings.TrimSuffix(host, "/")
 	}
 
-	jar, _ := cookiejar.New(nil)
-
 	return &client{
 		host,
 		false,
 		&http.Client{
 			Timeout: time.Second * 2,
-			Jar:     jar,
 		},
 		"",
 	}
@@ -94,13 +95,13 @@ func (c *client) Login(username, password string) error {
 
 	req, err := http.NewRequest("POST", restAuthUrl, bytes.NewBuffer(j))
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Connection", "keep-alive")
 	if err != nil {
 		return err
 	}
 
 	res, err := c.client.Do(req)
 
-	c.cookie = res.Header.Get("Set-Cookie")
 	switch res.StatusCode {
 	case http.StatusNotFound:
 		return errors.New("Nepodařilo se navázat spojení se serverem. Zkontrolujte zadanou adresu jiry")
@@ -108,38 +109,69 @@ func (c *client) Login(username, password string) error {
 		return errors.New("Přihlašovací údaje byly zadány chybně")
 	}
 
+	c.cookie = res.Header.Get("Set-Cookie")
 	c.isLoggedIn = true
 
 	return nil
 }
 
-//
-func (c client) FetchNewNotifications() *Notifications {
+func (c client) FetchNotificationCount() (int, error) {
 	if !c.isLoggedIn {
-		log.Fatal(errors.New("Uživatel není přihlášen!"))
+		return 0, errors.New("Uživatel není přihlášen!")
 	}
 
-	req, err := http.NewRequest(http.MethodGet, c.host+restNotifications, nil)
+	req, err := http.NewRequest(http.MethodGet, c.host+restNotificationCount, nil)
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 
 	req.Header.Set("Cookie", c.cookie)
 	res, err := c.client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
 	}
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return 0, err
+	}
+
+	var data *Count
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		return 0, err
+	}
+
+	return data.Count, nil
+}
+
+//
+func (c client) FetchNotifications() (*Notifications, error) {
+	if !c.isLoggedIn {
+		return nil, errors.New("Uživatel není přihlášen!")
+	}
+
+	req, err := http.NewRequest(http.MethodGet, c.host+restNotifications, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Cookie", c.cookie)
+	res, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
 	}
 
 	var data *Notifications
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return data
+	return data, nil
 }
