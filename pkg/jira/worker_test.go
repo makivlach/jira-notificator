@@ -55,16 +55,23 @@ func TestNotificationWorker_fetchNotifications(t *testing.T) {
 	finishedChan := make(chan bool)
 
 	worker := &notificationWorker{
-		c:                mockClient{},
-		channel:          notificationChan,
-		finished:         finishedChan,
-		notificationData: []Notification{},
-		state:            mockFetchNotificationsStateFunc,
+		c:        mockClient{},
+		channel:  notificationChan,
+		finished: finishedChan,
+		notificationData: []Notification{
+			{
+				Title: "Testovací Notifikace 2",
+			},
+		},
+		state: mockFetchNotificationsStateFunc,
 	}
 
 	go worker.Start(0)
-	notifications := <-notificationChan
-	<-finishedChan
+
+	var notifications []Notification
+	select {
+	case notifications = <-notificationChan:
+	}
 
 	if assert.NoError(t, worker.e) {
 		assert.Equal(t, testWorkerNotifications, notifications)

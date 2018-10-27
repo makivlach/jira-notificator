@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/200sc/klangsynthese/mp3"
 	"github.com/gen2brain/beeep"
 	"github.com/vlachmilan/jira-notificator/pkg/jira"
 	"gopkg.in/AlecAivazis/survey.v1"
@@ -68,8 +69,8 @@ func login(c jira.Client, login, password string) {
 func fetchNewNotifications(c jira.Client) {
 	channel := make(chan []jira.Notification)
 	finished := make(chan bool)
-	worker := jira.NewWorker(c, channel, finished)
 
+	worker := jira.NewWorker(c, channel, finished)
 	notificator := jira.NewNotificator(beeep.Alert)
 
 	go worker.Start(notificationInterval)
@@ -84,8 +85,24 @@ func fetchNewNotifications(c jira.Client) {
 				log.Fatalln(err)
 				os.Exit(1)
 			}
+
+			if err := playNotificationMusic(); err != nil {
+				log.Fatalln(err)
+				os.Exit(1)
+			}
 		case <-finished:
-			break
+			return
 		}
 	}
+}
+
+func playNotificationMusic() error {
+	f, err := os.Open("./assets/notify.mp3")
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	a, err := mp3.Load(f)
+	return <-a.Play()
 }
