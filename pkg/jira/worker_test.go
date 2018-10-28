@@ -15,6 +15,33 @@ var testWorkerNotifications = []Notification{
 	},
 }
 
+func mockStateFunc(f *notificationWorker) stateFunc {
+	return nil
+}
+
+func mockFetchNotificationCountStateFunc(f *notificationWorker) stateFunc {
+	_ = fetchNotificationCount(f)
+	return nil
+}
+
+func mockFetchNotificationsStateFunc(f *notificationWorker) stateFunc {
+	_ = fetchNotifications(f)
+	return nil
+}
+
+type mockClient struct{}
+
+func (mockClient) FetchNotificationCount() (int, error) {
+	return testWorkerNotificationCount, nil
+}
+
+func (mockClient) FetchNotifications() ([]Notification, error) {
+	return testWorkerNotifications, nil
+}
+func (mockClient) Login(username, password string) error {
+	return nil
+}
+
 func TestNotificationWorker_Start(t *testing.T) {
 	notificationChan := make(chan []Notification)
 	finishedChan := make(chan bool)
@@ -76,31 +103,4 @@ func TestNotificationWorker_fetchNotifications(t *testing.T) {
 	if assert.NoError(t, worker.e) {
 		assert.Equal(t, testWorkerNotifications, notifications)
 	}
-}
-
-func mockStateFunc(f *notificationWorker) stateFunc {
-	return nil
-}
-
-func mockFetchNotificationCountStateFunc(f *notificationWorker) stateFunc {
-	_ = fetchNotificationCount(f)
-	return nil
-}
-
-func mockFetchNotificationsStateFunc(f *notificationWorker) stateFunc {
-	_ = fetchNotifications(f)
-	return nil
-}
-
-type mockClient struct{}
-
-func (mockClient) FetchNotificationCount() (int, error) {
-	return testWorkerNotificationCount, nil
-}
-
-func (mockClient) FetchNotifications() ([]Notification, error) {
-	return testWorkerNotifications, nil
-}
-func (mockClient) Login(username, password string) error {
-	return nil
 }

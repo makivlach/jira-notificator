@@ -25,62 +25,6 @@ var testClientNotifications = []Notification{
 	},
 }
 
-func TestNewClient(t *testing.T) {
-	expected := &client{
-		testHostUrl,
-		false,
-		&http.Client{
-			Timeout: time.Second * 5,
-		},
-		"",
-	}
-	actual := NewClient(testHostUrl)
-
-	assert.Equal(t, expected, actual)
-}
-
-func TestClient_Login(t *testing.T) {
-	client := &client{
-		testHostUrl,
-		false,
-		&httpClientMock{},
-		"",
-	}
-
-	err := client.Login(testUsername, testPassword)
-	if assert.NoError(t, err) {
-		assert.Equal(t, true, client.isLoggedIn)
-	}
-}
-
-func TestClient_FetchNotificationCount(t *testing.T) {
-	client := &client{
-		testHostUrl,
-		true,
-		&httpClientMock{},
-		testCookie,
-	}
-
-	count, err := client.FetchNotificationCount()
-	if assert.NoError(t, err) {
-		assert.Equal(t, testNotificationsCount, count)
-	}
-}
-
-func TestClient_FetchNotifications(t *testing.T) {
-	client := &client{
-		testHostUrl,
-		true,
-		&httpClientMock{},
-		testCookie,
-	}
-
-	notifications, err := client.FetchNotifications()
-	if assert.NoError(t, err) {
-		assert.Equal(t, testClientNotifications, notifications)
-	}
-}
-
 type httpClientMock struct{}
 
 func (c httpClientMock) Do(r *http.Request) (*http.Response, error) {
@@ -160,4 +104,60 @@ func (c httpClientMock) handleNotificationsCountRequest(r *http.Request) (*http.
 		resp.StatusCode = http.StatusUnauthorized
 	}
 	return resp, nil
+}
+
+func TestNewClient(t *testing.T) {
+	expected := &client{
+		testHostUrl,
+		false,
+		&http.Client{
+			Timeout: time.Second * 5,
+		},
+		"",
+	}
+	actual := NewClient(testHostUrl)
+
+	assert.Equal(t, expected, actual)
+}
+
+func TestClient_Login(t *testing.T) {
+	client := &client{
+		testHostUrl,
+		false,
+		&httpClientMock{},
+		"",
+	}
+
+	err := client.Login(testUsername, testPassword)
+	if assert.NoError(t, err) {
+		assert.Equal(t, true, client.isLoggedIn)
+	}
+}
+
+func TestClient_FetchNotificationCount(t *testing.T) {
+	client := &client{
+		testHostUrl,
+		true,
+		&httpClientMock{},
+		testCookie,
+	}
+
+	count, err := client.FetchNotificationCount()
+	if assert.NoError(t, err) {
+		assert.Equal(t, testNotificationsCount, count)
+	}
+}
+
+func TestClient_FetchNotifications(t *testing.T) {
+	client := &client{
+		testHostUrl,
+		true,
+		&httpClientMock{},
+		testCookie,
+	}
+
+	notifications, err := client.FetchNotifications()
+	if assert.NoError(t, err) {
+		assert.Equal(t, testClientNotifications, notifications)
+	}
 }

@@ -13,6 +13,11 @@ var testNotifyNotifications = []Notification{
 	},
 }
 
+func alerterMock(title, message, appIcon string) error {
+	log.Println(fmt.Sprintf("%s: Application %s just alerted message \"%s\"", appIcon, title, message))
+	return nil
+}
+
 func TestNewNotificator(t *testing.T) {
 	expected := &Notificator{nil}
 	actual := NewNotificator(nil)
@@ -26,9 +31,4 @@ func TestNotificator_Notify(t *testing.T) {
 
 	err := notificator.Notify(testNotifyNotifications)
 	assert.Equal(t, nil, err)
-}
-
-func alerterMock(title, message, appIcon string) error {
-	log.Println(fmt.Sprintf("%s: Application %s just alerted message \"%s\"", appIcon, title, message))
-	return nil
 }
