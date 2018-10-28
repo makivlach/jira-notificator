@@ -18,13 +18,19 @@ type notificationWorker struct {
 	channel           chan []Notification
 }
 
-func NewWorker(client Client, channel chan []Notification, finished chan bool) *notificationWorker {
-	return &notificationWorker{
-		state:    fetchNotificationCount,
-		c:        client,
-		finished: finished,
-		channel:  channel,
+func NewWorker(client Client, channel chan []Notification, finished chan bool) (*notificationWorker, error) {
+	notifications, err := client.FetchNotifications()
+	if err != nil {
+		return nil, err
 	}
+
+	return &notificationWorker{
+		state:            fetchNotificationCount,
+		notificationData: notifications,
+		c:                client,
+		finished:         finished,
+		channel:          channel,
+	}, err
 }
 
 func (w *notificationWorker) Start(refreshInterval time.Duration) {

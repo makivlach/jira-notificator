@@ -12,7 +12,7 @@ import (
 
 const (
 	notificationInterval = 10
-	notificationSound    = "/assets/notify.mp3"
+	notificationSound    = "assets/notify.mp3"
 )
 
 // the questions to ask
@@ -72,9 +72,13 @@ func fetchNewNotifications(c jira.Client) {
 	channel := make(chan []jira.Notification)
 	finished := make(chan bool)
 
-	worker := jira.NewWorker(c, channel, finished)
-	notificator := jira.NewNotificator(beeep.Alert)
+	worker, err := jira.NewWorker(c, channel, finished)
+	if err != nil {
+		log.Fatalln(err)
+		os.Exit(1)
+	}
 
+	notificator := jira.NewNotificator(beeep.Alert)
 	go worker.Start(notificationInterval)
 
 	for {
