@@ -1,9 +1,8 @@
 package main
 
 import (
-	"bytes"
-	"github.com/200sc/klangsynthese/mp3"
 	"github.com/gen2brain/beeep"
+	"github.com/vlachmilan/jira-notificator/pkg/audio"
 	"github.com/vlachmilan/jira-notificator/pkg/jira"
 	"gopkg.in/AlecAivazis/survey.v1"
 	"log"
@@ -72,6 +71,18 @@ func fetchNewNotifications(c jira.Client) {
 	channel := make(chan []jira.Notification)
 	finished := make(chan bool)
 
+	file, err := Asset(notificationSound)
+	if err != nil {
+		log.Fatalln(err)
+		os.Exit(1)
+	}
+
+	player, err := audio.NewPlayer(file)
+	if err != nil {
+		log.Fatalln(err)
+		os.Exit(1)
+	}
+
 	worker, err := jira.NewWorker(c, channel, finished)
 	if err != nil {
 		log.Fatalln(err)
@@ -92,7 +103,7 @@ func fetchNewNotifications(c jira.Client) {
 				os.Exit(1)
 			}
 
-			if err := playNotificationMusic(); err != nil {
+			if err := player.Play(); err != nil {
 				log.Fatalln(err)
 				os.Exit(1)
 			}
@@ -100,23 +111,4 @@ func fetchNewNotifications(c jira.Client) {
 			return
 		}
 	}
-}
-
-func playNotificationMusic() error {
-	file, err := Asset(notificationSound)
-	if err != nil {
-		return err
-	}
-
-	reader := &reader{bytes.NewReader(file)}
-	a, err := mp3.Load(reader)
-	return <-a.Play()
-}
-
-type reader struct {
-	*bytes.Reader
-}
-
-func (*reader) Close() error {
-	return nil
 }
