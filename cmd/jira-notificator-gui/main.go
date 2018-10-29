@@ -3,14 +3,11 @@
 package main
 
 import (
-	"C"
 	"github.com/andlabs/ui"
 	_ "github.com/andlabs/ui/winmanifest"
 	"github.com/vlachmilan/jira-notificator/pkg/jira"
 	"log"
-	_ "log"
 	"os"
-	_ "os"
 )
 
 const (
