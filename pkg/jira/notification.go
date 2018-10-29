@@ -2,6 +2,8 @@ package jira
 
 import (
 	"github.com/gen2brain/beeep"
+	"github.com/hajimehoshi/oto"
+	"github.com/pkg/errors"
 	"log"
 	"time"
 )
@@ -33,14 +35,14 @@ func FetchNewNotifications(c Client, data NotificationData) error {
 	channel := make(chan []Notification)
 	finished := make(chan bool)
 
-	player, err := NewPlayer(data.Sound)
+	player, err := oto.NewPlayer(44100, 2, 2, 40000)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Chyba při inicializaci zvukového zařízení")
 	}
 
 	worker, err := NewWorker(c, channel, finished)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Chyba navázání připojení na data notifikací")
 	}
 
 	notificator := &notificator{beeep.Alert}
@@ -51,16 +53,17 @@ func FetchNewNotifications(c Client, data NotificationData) error {
 		case notifications := <-channel:
 			log.Println(data.Text)
 
-			if err := player.Play(); err != nil {
-				return err
+			_, err := player.Write(data.Sound)
+			if err != nil {
+				return errors.Wrap(err, "Chyba při přehrávání tónu notifikace")
 			}
 
-			err := notificator.notify(notifications)
+			err = notificator.notify(notifications)
 			if err != nil {
-				return err
+				return errors.Wrap(err, "Chyba při vytváření notifikace")
 			}
 		case <-finished:
-			return worker.e
+			return errors.Wrap(worker.e, "Chyba při provádění aktualizace dat")
 		}
 	}
 }

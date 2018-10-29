@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	notificationSound = "assets/notify.mp3"
+	notificationSound = "assets/notify.wav"
 	icon              = "assets/icon.ico"
 	interval          = 15
 )
@@ -54,6 +54,11 @@ func makeBasicControlsPage() ui.Control {
 
 	button := ui.NewButton("Přihlásit se")
 	button.OnClicked(func(*ui.Button) {
+		if host.Text() == "" || username.Text() == "" || password.Text() == "" {
+			ui.MsgBoxError(mainwin, "Chyba", "Vyplňte všechny údaje")
+			return
+		}
+
 		host.Disable()
 		username.Disable()
 		password.Disable()
@@ -64,6 +69,10 @@ func makeBasicControlsPage() ui.Control {
 			if err != nil {
 				ui.QueueMain(func() {
 					ui.MsgBoxError(window, "Chyba", err.Error())
+					host.Enable()
+					username.Enable()
+					password.Enable()
+					button.Enable()
 				})
 				return
 			}
@@ -72,6 +81,10 @@ func makeBasicControlsPage() ui.Control {
 			if err != nil {
 				ui.QueueMain(func() {
 					ui.MsgBoxError(window, "Chyba", err.Error())
+					host.Enable()
+					username.Enable()
+					password.Enable()
+					button.Enable()
 				})
 				return
 			}
@@ -83,6 +96,10 @@ func makeBasicControlsPage() ui.Control {
 			if err != nil {
 				ui.QueueMain(func() {
 					ui.MsgBoxError(window, "Chyba", err.Error())
+					host.Enable()
+					username.Enable()
+					password.Enable()
+					button.Enable()
 				})
 				return
 			}
