@@ -51,16 +51,16 @@ func FetchNewNotifications(c Client, data NotificationData) error {
 		case notifications := <-channel:
 			log.Println(data.Text)
 
+			if err := player.Play(); err != nil {
+				return err
+			}
+
 			err := notificator.notify(notifications)
 			if err != nil {
 				return err
 			}
-
-			if err := player.Play(); err != nil {
-				return err
-			}
 		case <-finished:
-			return nil
+			return worker.e
 		}
 	}
 }
