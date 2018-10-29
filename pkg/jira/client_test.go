@@ -107,39 +107,65 @@ func (c httpClientMock) handleNotificationsCountRequest(r *http.Request) (*http.
 }
 
 func TestNewClient(t *testing.T) {
+	credentials := make(map[string]string)
+	credentials["username"] = testUsername
+	credentials["password"] = testPassword
+
+	j, err := json.Marshal(credentials)
+
+	credentialBuffer := bytes.NewBuffer(j)
+
 	expected := &client{
 		testHostUrl,
-		false,
 		&http.Client{
 			Timeout: time.Second * 5,
 		},
 		"",
+		credentialBuffer,
 	}
-	actual := NewClient(testHostUrl)
+	actual, err := NewClient(testHostUrl, testUsername, testPassword)
 
-	assert.Equal(t, expected, actual)
+	if assert.NoError(t, err) {
+		assert.Equal(t, expected, actual)
+	}
 }
 
 func TestClient_Login(t *testing.T) {
+	credentials := make(map[string]string)
+	credentials["username"] = testUsername
+	credentials["password"] = testPassword
+
+	j, err := json.Marshal(credentials)
+
+	credentialBuffer := bytes.NewBuffer(j)
+
 	client := &client{
 		testHostUrl,
-		false,
 		&httpClientMock{},
 		"",
+		credentialBuffer,
 	}
 
-	err := client.Login(testUsername, testPassword)
+	err = client.Login()
 	if assert.NoError(t, err) {
-		assert.Equal(t, true, client.isLoggedIn)
+		assert.Equal(t, true, client.isLoggedIn())
 	}
 }
 
 func TestClient_FetchNotificationCount(t *testing.T) {
+	credentials := make(map[string]string)
+	credentials["username"] = testUsername
+	credentials["password"] = testPassword
+
+	j, err := json.Marshal(credentials)
+
+	credentialBuffer := bytes.NewBuffer(j)
+
 	client := &client{
 		testHostUrl,
-		true,
 		&httpClientMock{},
 		testCookie,
+		credentialBuffer,
 	}
 
 	count, err := client.FetchNotificationCount()
@@ -149,11 +175,19 @@ func TestClient_FetchNotificationCount(t *testing.T) {
 }
 
 func TestClient_FetchNotifications(t *testing.T) {
+	credentials := make(map[string]string)
+	credentials["username"] = testUsername
+	credentials["password"] = testPassword
+
+	j, err := json.Marshal(credentials)
+
+	credentialBuffer := bytes.NewBuffer(j)
+
 	client := &client{
 		testHostUrl,
-		true,
 		&httpClientMock{},
 		testCookie,
+		credentialBuffer,
 	}
 
 	notifications, err := client.FetchNotifications()

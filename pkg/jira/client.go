@@ -47,10 +47,10 @@ type (
 
 	// client is service for our data fetching
 	client struct {
-		host       string
-		isLoggedIn bool
-		client     httpClient
-		cookie     string
+		host             string
+		client           httpClient
+		cookie           string
+		credentialBuffer *bytes.Buffer
 	}
 )
 
@@ -59,7 +59,7 @@ type (
 	Client interface {
 		FetchNotificationCount() (int, error)
 		FetchNotifications() ([]Notification, error)
-		Login(username, password string) error
+		Login() error
 	}
 
 	httpClient interface {
@@ -68,19 +68,30 @@ type (
 )
 
 // Factory to our fetcher
-func NewClient(host string) Client {
+func NewClient(host, username, password string) (Client, error) {
 	if strings.HasSuffix(host, "/") {
 		strings.TrimSuffix(host, "/")
 	}
 
+	credentials := make(map[string]string)
+	credentials["username"] = username
+	credentials["password"] = password
+
+	j, err := json.Marshal(credentials)
+	if err != nil {
+		return nil, err
+	}
+
+	credentialBuffer := bytes.NewBuffer(j)
+
 	return &client{
 		host,
-		false,
 		&http.Client{
 			Timeout: time.Second * 5,
 		},
 		"",
-	}
+		credentialBuffer,
+	}, nil
 }
 
 func (c *client) isHostExisting() error {
@@ -102,21 +113,32 @@ func (c *client) isHostExisting() error {
 	return nil
 }
 
-func (c *client) Login(username, password string) error {
+func (c *client) isLoggedIn() bool {
+	req, err := http.NewRequest(http.MethodGet, c.host+restNotificationCount, nil)
+	if err != nil {
+		return false
+	}
+
+	req.Header.Set("Cookie", c.cookie)
+	req.Header.Add("Connection", "keep-alive")
+	res, err := c.client.Do(req)
+	if err != nil {
+		return false
+	}
+
+	if res.StatusCode != http.StatusForbidden {
+		return true
+	}
+
+	return false
+}
+
+func (c *client) Login() error {
 	if err := c.isHostExisting(); err != nil {
 		return err
 	}
 
-	credentials := make(map[string]string)
-	credentials["username"] = username
-	credentials["password"] = password
-
-	j, err := json.Marshal(credentials)
-	if err != nil {
-		return err
-	}
-
-	req, err := http.NewRequest("POST", restAuthUrl, bytes.NewBuffer(j))
+	req, err := http.NewRequest("POST", restAuthUrl, c.credentialBuffer)
 	req.Header.Add("Content-Type", "application/json")
 	if err != nil {
 		return err
@@ -132,14 +154,13 @@ func (c *client) Login(username, password string) error {
 	}
 
 	c.cookie = res.Header.Get("Set-Cookie")
-	c.isLoggedIn = true
 
-	return nil
+	return err
 }
 
 func (c client) FetchNotificationCount() (int, error) {
-	if !c.isLoggedIn {
-		return 0, errors.New("uživatel není přihlášen")
+	if !c.isLoggedIn() {
+		c.Login()
 	}
 
 	req, err := http.NewRequest(http.MethodGet, c.host+restNotificationCount, nil)
@@ -170,8 +191,8 @@ func (c client) FetchNotificationCount() (int, error) {
 
 //
 func (c client) FetchNotifications() ([]Notification, error) {
-	if !c.isLoggedIn {
-		return nil, errors.New("uživatel není přihlášen")
+	if !c.isLoggedIn() {
+		c.Login()
 	}
 
 	req, err := http.NewRequest(http.MethodGet, c.host+restNotifications, nil)

@@ -38,7 +38,7 @@ func (mockClient) FetchNotificationCount() (int, error) {
 func (mockClient) FetchNotifications() ([]Notification, error) {
 	return testWorkerNotifications, nil
 }
-func (mockClient) Login(username, password string) error {
+func (mockClient) Login() error {
 	return nil
 }
 

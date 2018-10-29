@@ -51,8 +51,7 @@ func (w *notificationWorker) Start(refreshInterval time.Duration) {
 func fetchNotifications(f *notificationWorker) stateFunc {
 	notifications, err := f.c.FetchNotifications()
 	if err != nil {
-		f.e = err
-		return nil
+		log.Fatalln(err)
 	}
 
 	if !cmp.Equal(f.notificationData, notifications) {
@@ -79,8 +78,7 @@ func fetchNotifications(f *notificationWorker) stateFunc {
 func fetchNotificationCount(f *notificationWorker) stateFunc {
 	count, err := f.c.FetchNotificationCount()
 	if err != nil {
-		f.e = err
-		return nil
+		log.Fatalln(err)
 	}
 
 	if count != f.notificationCount {

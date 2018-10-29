@@ -1,8 +1,6 @@
 package main
 
 import (
-	"github.com/gen2brain/beeep"
-	"github.com/vlachmilan/jira-notificator/pkg/audio"
 	"github.com/vlachmilan/jira-notificator/pkg/jira"
 	"gopkg.in/AlecAivazis/survey.v1"
 	"log"
@@ -10,7 +8,7 @@ import (
 )
 
 const (
-	notificationInterval = 10
+	notificationInterval = 15
 	notificationSound    = "assets/notify.mp3"
 )
 
@@ -43,72 +41,37 @@ func main() {
 		Password string
 	}{}
 
-	// perform the questions
+	//perform the questions
 	err := survey.Ask(qs, &answers)
 	if err != nil {
 		log.Fatalln(err.Error())
 		os.Exit(1)
 	}
 
-	c := jira.NewClient(answers.Host)
+	c, err := jira.NewClient(answers.Host, answers.Username, answers.Password)
+	if err != nil {
+		log.Fatalln(err)
+		os.Exit(1)
+	}
 
-	login(c, answers.Username, answers.Password)
-	fetchNewNotifications(c)
+	sound, err := Asset(notificationSound)
+	if err != nil {
+		log.Fatalln(err)
+		os.Exit(1)
+	}
+
+	err = c.Login()
+	if err != nil {
+		log.Fatalln(err)
+		os.Exit(1)
+	}
+	println("Uživatel přihlášen")
+
+	err = jira.FetchNewNotifications(c, jira.NotificationData{Sound: sound, Interval: notificationInterval, Text: "Provedení aktualizace"})
+	if err != nil {
+		log.Fatalln(err)
+		os.Exit(1)
+	}
 
 	os.Exit(0)
-}
-
-func login(c jira.Client, login, password string) {
-	err := c.Login(login, password)
-	if err != nil {
-		log.Fatalln(err)
-		os.Exit(1)
-	}
-	log.Println("Uživatel přihlášen")
-}
-
-func fetchNewNotifications(c jira.Client) {
-	channel := make(chan []jira.Notification)
-	finished := make(chan bool)
-
-	file, err := Asset(notificationSound)
-	if err != nil {
-		log.Fatalln(err)
-		os.Exit(1)
-	}
-
-	player, err := audio.NewPlayer(file)
-	if err != nil {
-		log.Fatalln(err)
-		os.Exit(1)
-	}
-
-	worker, err := jira.NewWorker(c, channel, finished)
-	if err != nil {
-		log.Fatalln(err)
-		os.Exit(1)
-	}
-
-	notificator := jira.NewNotificator(beeep.Alert)
-	go worker.Start(notificationInterval)
-
-	for {
-		select {
-		case notifications := <-channel:
-			log.Println("Provedení aktualizace")
-
-			err := notificator.Notify(notifications)
-			if err != nil {
-				log.Fatalln(err)
-				os.Exit(1)
-			}
-
-			if err := player.Play(); err != nil {
-				log.Fatalln(err)
-				os.Exit(1)
-			}
-		case <-finished:
-			return
-		}
-	}
 }

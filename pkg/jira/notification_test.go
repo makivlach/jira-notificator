@@ -18,17 +18,11 @@ func alerterMock(title, message, appIcon string) error {
 	return nil
 }
 
-func TestNewNotificator(t *testing.T) {
-	expected := &Notificator{nil}
-	actual := NewNotificator(nil)
-	assert.Equal(t, expected, actual)
-}
-
 func TestNotificator_Notify(t *testing.T) {
-	notificator := &Notificator{
+	notificator := &notificator{
 		alerterMock,
 	}
 
-	err := notificator.Notify(testNotifyNotifications)
+	err := notificator.notify(testNotifyNotifications)
 	assert.Equal(t, nil, err)
 }
