@@ -13,7 +13,7 @@ import (
 const (
 	notificationSound = "assets/notify.wav"
 	icon              = "assets/icon.ico"
-	interval          = 15
+	interval          = 25
 )
 
 var mainwin *ui.Window

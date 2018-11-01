@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	notificationInterval = 15
+	notificationInterval = 25
 	notificationSound    = "assets/notify.mp3"
 )
 
