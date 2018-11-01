@@ -28,7 +28,8 @@ _The installation process described below is designed for Ubuntu based distribut
 
 # Screenshots
 
-TODO
+### UI:
+![screenshot1](doc/screenshot1.png)
 
 # Known issues & todos
 - [ ] "crackly" tone issues
