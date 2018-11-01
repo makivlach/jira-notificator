@@ -19,7 +19,7 @@ Just [download](https://github.com/vlachmilan/jira-notificator/releases) the lat
 
 ## Linux
 
-_The installation process described below is designed for Ubuntu based distribution only. Installation for other distros might differ._
+_The installation process described below has been designed for Ubuntu based distributions only. Installation for other distros might differ - if so, **please open new [issue](https://github.com/vlachmilan/jira-notificator/issues)**._
 
 1. `sudo apt install libasound2-dev`
 2. `sudo apt install libgtk-3-dev`
