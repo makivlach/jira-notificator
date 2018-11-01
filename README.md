@@ -38,6 +38,6 @@ _The installation process described below has been designed for Ubuntu based dis
 - [ ] code cleanup and documentation
 - [ ] better GUI code organization
 
-# Lincence
+# Licence
 
 MIT
