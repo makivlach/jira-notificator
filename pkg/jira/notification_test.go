@@ -9,7 +9,7 @@ import (
 
 var testNotifyNotifications = []Notification{
 	{
-		Title: "Testovací Notifikace",
+		Title: "Testing notification",
 	},
 }
 

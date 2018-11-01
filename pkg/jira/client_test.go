@@ -21,7 +21,7 @@ const (
 
 var testClientNotifications = []Notification{
 	{
-		Title: "Testovací Notifikace",
+		Title: "Testing notification",
 	},
 }
 

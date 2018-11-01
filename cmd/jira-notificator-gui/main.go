@@ -30,7 +30,7 @@ func init() {
 	notificationData = jira.NotificationData{
 		Sound:    sound,
 		Interval: interval,
-		Text:     "Provedení katualizace",
+		Text:     "Perform update",
 	}
 }
 
@@ -38,7 +38,7 @@ func makeBasicControlsPage() ui.Control {
 	vbox := ui.NewVerticalBox()
 	vbox.SetPadded(true)
 
-	group := ui.NewGroup("Přihlašovací údaje")
+	group := ui.NewGroup("User credentials")
 	group.SetMargined(true)
 	vbox.Append(group, true)
 
@@ -52,10 +52,10 @@ func makeBasicControlsPage() ui.Control {
 	username := ui.NewEntry()
 	password := ui.NewPasswordEntry()
 
-	button := ui.NewButton("Přihlásit se")
+	button := ui.NewButton("Log in")
 	button.OnClicked(func(*ui.Button) {
 		if host.Text() == "" || username.Text() == "" || password.Text() == "" {
-			ui.MsgBoxError(mainwin, "Chyba", "Vyplňte všechny údaje")
+			ui.MsgBoxError(mainwin, "Error", "fill all required fields")
 			return
 		}
 
@@ -68,7 +68,7 @@ func makeBasicControlsPage() ui.Control {
 			client, err := jira.NewClient(host.Text(), username.Text(), password.Text())
 			if err != nil {
 				ui.QueueMain(func() {
-					ui.MsgBoxError(window, "Chyba", err.Error())
+					ui.MsgBoxError(window, "Error", err.Error())
 					host.Enable()
 					username.Enable()
 					password.Enable()
@@ -80,7 +80,7 @@ func makeBasicControlsPage() ui.Control {
 			err = client.Login()
 			if err != nil {
 				ui.QueueMain(func() {
-					ui.MsgBoxError(window, "Chyba", err.Error())
+					ui.MsgBoxError(window, "Error", err.Error())
 					host.Enable()
 					username.Enable()
 					password.Enable()
@@ -89,13 +89,13 @@ func makeBasicControlsPage() ui.Control {
 				return
 			}
 			ui.QueueMain(func() {
-				ui.MsgBox(window, "Úspěch", "Úspěšně jste se přihlásili!")
+				ui.MsgBox(window, "Success", "User has been logged in!")
 			})
 
 			err = jira.FetchNewNotifications(client, notificationData)
 			if err != nil {
 				ui.QueueMain(func() {
-					ui.MsgBoxError(window, "Chyba", err.Error())
+					ui.MsgBoxError(window, "Error", err.Error())
 					host.Enable()
 					username.Enable()
 					password.Enable()
@@ -107,8 +107,8 @@ func makeBasicControlsPage() ui.Control {
 	})
 
 	entryForm.Append("Host", host, false)
-	entryForm.Append("Uživatelské jméno", username, false)
-	entryForm.Append("Heslo", password, false)
+	entryForm.Append("Login", username, false)
+	entryForm.Append("Password", password, false)
 	entryForm.Append("", button, false)
 
 	return vbox

@@ -8,6 +8,14 @@ import (
 	"time"
 )
 
+const (
+	errorWrapAudioInit        = "An error occurred while initializing audio device"
+	errorWrapConnection       = "An error occurred while trying to establish connection for notification data"
+	errorWrapPlayTone         = "An error occurred while trying to play the notification tone"
+	errorWrapFireNotification = "An error occurred while tying to fire the notifications"
+	errorWrapTryUpdateData    = "An error occurred while trying to update data"
+)
+
 type alerter func(title, message, appIcon string) error
 
 type NotificationData struct {
@@ -37,12 +45,12 @@ func FetchNewNotifications(c Client, data NotificationData) error {
 
 	player, err := oto.NewPlayer(44100, 2, 2, 40000)
 	if err != nil {
-		return errors.Wrap(err, "Chyba při inicializaci zvukového zařízení")
+		return errors.Wrap(err, errorWrapAudioInit)
 	}
 
 	worker, err := NewWorker(c, channel, finished)
 	if err != nil {
-		return errors.Wrap(err, "Chyba navázání připojení na data notifikací")
+		return errors.Wrap(err, errorWrapConnection)
 	}
 
 	notificator := &notificator{beeep.Alert}
@@ -55,15 +63,15 @@ func FetchNewNotifications(c Client, data NotificationData) error {
 
 			_, err := player.Write(data.Sound)
 			if err != nil {
-				return errors.Wrap(err, "Chyba při přehrávání tónu notifikace")
+				return errors.Wrap(err, errorWrapPlayTone)
 			}
 
 			err = notificator.notify(notifications)
 			if err != nil {
-				return errors.Wrap(err, "Chyba při vytváření notifikace")
+				return errors.Wrap(err, errorWrapFireNotification)
 			}
 		case <-finished:
-			return errors.Wrap(worker.e, "Chyba při provádění aktualizace dat")
+			return errors.Wrap(worker.e, errorWrapTryUpdateData)
 		}
 	}
 }

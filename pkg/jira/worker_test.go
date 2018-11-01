@@ -11,7 +11,7 @@ const (
 
 var testWorkerNotifications = []Notification{
 	{
-		Title: "Testovací Notifikace",
+		Title: "Testing notification",
 	},
 }
 

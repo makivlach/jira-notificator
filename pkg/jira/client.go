@@ -14,6 +14,9 @@ const (
 	restNotifications     = "/gateway/api/notification-log/api/2/notifications"
 	restNotificationCount = "/gateway/api/notification-log/api/2/notifications/count/unseen"
 	restAuthUrl           = "https://id.atlassian.com/id/rest/login"
+
+	errorUnableToFoundHost = "unable to establish connection with server. Check an address spelling"
+	errorWrongCredentials  = "wrong username or password"
 )
 
 // Data
@@ -107,7 +110,7 @@ func (c *client) isHostExisting() error {
 
 	switch res.StatusCode {
 	case http.StatusNotFound:
-		return errors.New("nepodařilo se navázat spojení se serverem. Zkontrolujte zadanou adresu jiry")
+		return errors.New(errorUnableToFoundHost)
 	}
 
 	return nil
@@ -148,9 +151,9 @@ func (c *client) Login() error {
 
 	switch res.StatusCode {
 	case http.StatusNotFound:
-		return errors.New("nepodařilo se navázat spojení se serverem. Zkontrolujte zadanou adresu jiry")
+		return errors.New(errorUnableToFoundHost)
 	case http.StatusForbidden:
-		return errors.New("přihlašovací údaje byly zadány chybně")
+		return errors.New(errorWrongCredentials)
 	}
 
 	c.cookie = res.Header.Get("Set-Cookie")

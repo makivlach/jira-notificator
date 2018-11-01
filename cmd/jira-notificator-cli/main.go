@@ -16,19 +16,19 @@ const (
 var qs = []*survey.Question{
 	{
 		Name:      "host",
-		Prompt:    &survey.Input{Message: "Zadejte adresu Jiry (například: https://something.atlassian.net): "},
+		Prompt:    &survey.Input{Message: "Jira address (e.g.: https://something.atlassian.net): "},
 		Validate:  survey.Required,
 		Transform: survey.Title,
 	},
 	{
 		Name:      "username",
-		Prompt:    &survey.Input{Message: "Zadejte přihlašovací jméno: "},
+		Prompt:    &survey.Input{Message: "Login: "},
 		Validate:  survey.Required,
 		Transform: survey.Title,
 	},
 	{
 		Name:      "password",
-		Prompt:    &survey.Password{Message: "Zadejte přihlašovací heslo: "},
+		Prompt:    &survey.Password{Message: "Password: "},
 		Validate:  survey.Required,
 		Transform: survey.Title,
 	},
@@ -65,9 +65,9 @@ func main() {
 		log.Fatalln(err)
 		os.Exit(1)
 	}
-	println("Uživatel přihlášen")
+	println("User has been successfully logged in")
 
-	err = jira.FetchNewNotifications(c, jira.NotificationData{Sound: sound, Interval: notificationInterval, Text: "Provedení aktualizace"})
+	err = jira.FetchNewNotifications(c, jira.NotificationData{Sound: sound, Interval: notificationInterval, Text: "Perform update"})
 	if err != nil {
 		log.Fatalln(err)
 		os.Exit(1)
