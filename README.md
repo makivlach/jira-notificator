@@ -44,10 +44,10 @@ _The installation process described below has been designed for Ubuntu based dis
 Checkout these amazing projects!
 
 - https://github.com/golang/go
-- gopkg.in/AlecAivazis/survey.v1
-- github.com/andlabs/ui
-- github.com/gen2brain/beeep
-- github.com/hajimehoshi/oto
+- https://gopkg.in/AlecAivazis/survey.v1
+- https://github.com/andlabs/ui
+- https://github.com/gen2brain/beeep
+- https://github.com/hajimehoshi/oto
 - https://github.com/jteeuwen/go-bindata
 - https://github.com/golang/dep
 - https://www.atlassian.com/
