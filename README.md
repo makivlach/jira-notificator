@@ -36,3 +36,7 @@ TODO
 - [ ] ability to minimize the app to system tray
 - [ ] code cleanup and documentation
 - [ ] better GUI code organization
+
+# Lincence
+
+MIT
