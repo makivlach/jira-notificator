@@ -1,11 +1,9 @@
-// 12 august 2018
-
 package main
 
 import (
 	"github.com/andlabs/ui"
 	_ "github.com/andlabs/ui/winmanifest"
-	"github.com/vlachmilan/jira-notificator/pkg/jira"
+	"github.com/vlachmilan/jira-notificator/internal/jira"
 	"log"
 	"os"
 )

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/vlachmilan/jira-notificator/pkg/jira"
+	"github.com/vlachmilan/jira-notificator/internal/jira"
 	"gopkg.in/AlecAivazis/survey.v1"
 	"log"
 	"os"
