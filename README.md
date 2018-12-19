@@ -32,12 +32,10 @@ _The installation process described below has been designed for Ubuntu based dis
 ![screenshot1](doc/screenshot1.png)
 
 # Known issues & todos
-- [ ] "crackly" tone issues
 - [ ] ugly GUI
 - [ ] ability to minimize the app to system tray
 - [ ] code cleanup and documentation
 - [ ] better GUI code organization
-- [ ] missing makefile
 
 # Credits:
 
