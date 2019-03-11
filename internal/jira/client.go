@@ -15,7 +15,7 @@ const (
 	restNotificationCount = "/gateway/api/notification-log/api/2/notifications/count/unseen"
 	restAuthUrl           = "https://id.atlassian.com/id/rest/login"
 
-	errorUnableToFoundHost = "unable to establish connection with server. Check an address spelling"
+	errorUnableToFoundHost = "unable to establish connection to the server. Check URL spelling"
 	errorWrongCredentials  = "wrong username or password"
 )
 
