@@ -7,7 +7,7 @@ A notification application for cloud based Jira workspace. Notifications are dir
 
 The notificator consists of CLI and GUI version. Both are cross-platform for Linux, Mac and Windows.
 
-_Note: Linux version might require instalation additional of libraries._
+_Note: Linux version might require installation of additional libraries._
 
 # Installation
 
